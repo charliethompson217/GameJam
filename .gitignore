@@ -1,5 +1,6 @@
 /.metadata/
-/CodeBlooded/.classpath
-/CodeBlooded/.project
-/CodeBlooded/bin
+.classpath
+.project/
+bin/
+.settings
 .DS_Store
