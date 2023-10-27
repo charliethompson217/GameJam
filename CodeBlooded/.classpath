@@ -6,6 +6,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="/Users/charlesthompson/Dev/GameJam/core.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Nhat Nguyen/GameJam/core.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

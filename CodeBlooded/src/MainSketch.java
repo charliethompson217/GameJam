@@ -7,12 +7,12 @@ public class MainSketch extends PApplet{
     }
 
     public void setup() {
-        background(0,255,0);
+        background(255,0,0);
         charachter =  new Box(this, 0,0);
     }
 
     public void draw() {
-    	background(0,255,0);
+    	background(255,0,0);
     	charachter.Update();
     }
     
