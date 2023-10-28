@@ -54,7 +54,7 @@ public class Level4 implements Scene {
             targets[i] = new Target(p, i * (width / 6) + (width / 10), height / 2, width, height, target, 0.1, 0.1, speed);
         }
 
-        int blocksPerHeight = height / 80;
+        int blocksPerHeight = height / 80 + 1;
         blocks = new GrumpyBlock[blocksPerHeight * 4];
         for (int i = 0; i < blocksPerHeight; i++) {
             blocks[i * 4] = new GrumpyBlock(p, block1, (width / 6) * 1, i * 80);

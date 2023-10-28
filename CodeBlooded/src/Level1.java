@@ -30,7 +30,6 @@ public class Level1 implements Scene {
         guy = p.loadImage("guy.png");
         robo = p.loadImage("robot2.png");
         helicopter = p.loadImage("helicopter.png");
-        
     }
 
     int countdown = 60*3;
