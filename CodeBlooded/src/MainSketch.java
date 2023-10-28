@@ -1,7 +1,7 @@
 import processing.core.*;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import processing.sound.*;
+//import processing.sound.*;
 
 public class MainSketch extends PApplet {
 
@@ -9,7 +9,7 @@ public class MainSketch extends PApplet {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     int width = (int) ((int) screenSize.getWidth() * 0.65);
     int height = (int) ((int) screenSize.getHeight() * 0.50);
-    SoundFile music;
+    //SoundFile music;
 
     public void settings() {
         width -= width % 50;
@@ -20,16 +20,17 @@ public class MainSketch extends PApplet {
     public void setup() {
         currentScene = new StartScene(this, width, height);
         currentScene.setup();
-        music = new SoundFile(this, "C:\\Users\\raman\\Downloads\\trevor_lentz_cyberpunkgenesismp3\\Trevor Lentz - Cyberpunk- Genesis\\Trevor Lentz - Cyberpunk- Genesis - 09 Debug Chamber.mp3");
-        music.play();
-        //StartScene(); // Call the startScene method in the setup to display the start scene text.
+        //music = new SoundFile(this, "C:\\Users\\raman\\Downloads\\trevor_lentz_cyberpunkgenesismp3\\Trevor Lentz - Cyberpunk- Genesis\\Trevor Lentz - Cyberpunk- Genesis - 09 Debug Chamber.mp3");
+        //music.play();
     }
 
     public void draw() {
         currentScene.draw();
+        /*
         if (!music.isPlaying()) {
             music.play();
         }
+        */
     }
 
     public void keyPressed() {
