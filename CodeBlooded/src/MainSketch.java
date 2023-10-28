@@ -6,15 +6,17 @@ public class MainSketch extends PApplet{
 	
 	static Scene currentScene;
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	int width = (int) screenSize.getWidth();
-	int height = (int) screenSize.getHeight();
+	int width = (int) ((int) screenSize.getWidth()*0.65);
+	int height = (int) ((int) screenSize.getHeight()*0.65);
 	
 	public void settings() {
-		fullScreen();
+		width-=width%50;
+		height-=height%50;
+		size(width, height);
     }
 
     public void setup() {
-    	currentScene = new Level3(this, width, height);
+    	currentScene = new Level2(this, width, height);
         currentScene.setup();
     }
 

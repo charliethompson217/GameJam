@@ -1,152 +1,82 @@
-import java.util.ArrayList;
+import processing.core.PApplet;
 
-import processing.core.*;
 
 public class Level3 implements Scene {
     PApplet p;  // Reference to the PApplet instance
-    Player player;
-    Boolean gameOver = false;
     int width;
     int height;
 
-    PImage playerHelicopter;
-    PImage background;
-    PImage target;
-    PImage block1;
-    PImage block2;
-    PImage block3;
-    PImage block4;
-    PGraphics backgroundGraphics;
     
-    Target targets[];
-    GrumpyBlock blocks[];
-    ArrayList<Bullet> bullets = new ArrayList<>();
+    private final int cellSize = 50;  
+    private final int rows, cols;
+    private Cell[][] grid;
+    private boolean[][] visited;
     
-    boolean shooting = false;
+    private int characterX = 0;  // Starting position of the character (top-left corner)
+    private int characterY = 0;
+    private final int characterSize = cellSize;  // Make the character fit inside a cell
+    
+    String password = "";
+
 
     public Level3(PApplet p, int width, int height) {
         this.p = p;
-        this.width=width;
-        this.height=height;
-        playerHelicopter = p.loadImage("level1Player.png");
-        background = p.loadImage("level3background.png");
-        target = p.loadImage("HotAirBalloon.png");
-        block1 = p.loadImage("block1.png");
-        block2 = p.loadImage("block2.png");
-        block3 = p.loadImage("block3.png");
-        block4 = p.loadImage("block4.png");
+        this.width = width;
+        this.height = height;
+        this.rows = height / cellSize;
+        this.cols = width / cellSize;
+        this.grid = new Cell[cols][rows];
+        this.visited = new boolean[cols][rows];
+
+        for (int x = 0; x < cols; x++) {
+            for (int y = 0; y < rows; y++) {
+                grid[x][y] = new Cell(x, y);
+            }
+        }
+        grid[0][0].walls[0] = false; // Break the top wall
+        grid[0][0].walls[3] = false; // Break the left wall
+
     }
 
     int countdown = 60*3;
     public void setup() {
-    	player = new Player(p, 0, 225, width, height, playerHelicopter, 0.1, 0.1);
+    	p.background(0,100,0);
+    	generateMaze(0, 0);
     	
-    	p.background(255,0,0);
-    	backgroundGraphics = p.createGraphics(width, height);
-    	backgroundGraphics.beginDraw();
-    	backgroundGraphics.image(background, 0, 0);
-    	backgroundGraphics.endDraw();
-    	
-    	targets = new Target[5];
-    	for(int i=0; i<targets.length; i++) {
-    		int speed = 4 + i*2;
-    		if(i%2==0)
-    			speed*=-1;
-    		targets[i] = new Target(p, i*250+250, 250, width, height, target, 0.1, 0.1, speed);
+    	String CHAR_SET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    	// Define boundaries for the CPU box in terms of grid indices
+    	int cpuStartX = (cols - 4) / 2;  // Since the CPU box is 4 cells wide
+    	int cpuEndX = cpuStartX + 4;
+    	int cpuStartY = (rows - 4) / 2;  // Since the CPU box is 4 cells tall
+    	int cpuEndY = cpuStartY + 4;
+
+    	for(int i=0; i<3; i++) {
+    	    int x = (int) (p.random(grid.length));
+    	    int y = (int) (p.random(grid[0].length));
+
+    	    // Check if the x,y position is inside the CPU or if it's already a code block
+    	    if(grid[x][y].isCodeBlock || (x >= cpuStartX && x < cpuEndX && y >= cpuStartY && y < cpuEndY)) {
+    	        i--;  // Decrement the loop counter to try again
+    	        continue;
+    	    }
+
+    	    grid[x][y].isCodeBlock = true;
+
+    	    for(int j=0; j<3; j++) {
+    	        grid[x][y].code += CHAR_SET.charAt((int) (Math.random()*CHAR_SET.length()));
+    	    }
     	}
-    	blocks = new GrumpyBlock[(height/100)*4];
-    	for(int i=0; i<height/100; i++) {
-        	blocks[i*4] = new GrumpyBlock(p, block1, 350, i*100);
-        	blocks[i*4+1] = new GrumpyBlock(p, block2, 600, i*100);
-        	blocks[i*4+2] = new GrumpyBlock(p, block3, 850, i*100);
-        	blocks[i*4+3] = new GrumpyBlock(p, block4, 1100, i*100);
-    	}
+
     	
     }
-    int frame=0;
-    public void draw() {
-    	frame++;
-    	p.background(255,0,0);
-    	p.image(backgroundGraphics, 0, 0);
-    	player.Update(gameOver);
-    	
-    	int c=0;
-    	for(int i=0; i<targets.length; i++) {
-    		if(targets[i]!=null)
-    			targets[i].Update();
-    		else c++;
-    	}
-    	if(c==targets.length)
-    		gameOver=true;
-    	
-    	for (int i = bullets.size() - 1; i >= 0; i--) {
-            Bullet bullet = bullets.get(i);
-            bullet.Update();
-            if (bullet.x > width) { // If bullet goes off-screen
-                bullets.remove(i);  // Remove it from the list
-            }
-            int count=0;
-            for(int j = 0; j < targets.length; j++) {
-                Target currentTarget = targets[j];
-                if(currentTarget!=null) {
-	                if(bullet.collidesWith(currentTarget.x, currentTarget.y, currentTarget.width, currentTarget.height)) {
-	                    bullets.remove(i);  // Remove the bullet
-	                    targets[j] = null;  // Set the target to null (remove the balloon)
-	                    break;  // exit the loop once a collision is found
-	                }
-                } else {
-                	count++;
-                } 
-            }
-            if (count == targets.length) {
-            	gameOver=true;
-            }
-            for (int j = 0; j < blocks.length; j++) {
-                GrumpyBlock currentBlock = blocks[j];
-                if (!currentBlock.hit)
-	                if (bullet.collidesWith(currentBlock.x, currentBlock.y, currentBlock.width, currentBlock.height)) {
-	                    bullets.remove(i);
-	                    currentBlock.hit = true;
-	                    break;  // Exit the inner loop once a collision is found
-	                }
-            }
-        }
-    	if(shooting&&frame%20==0) {
-    		Bullet newBullet = new Bullet(p, player.x, player.y+30);
-            bullets.add(newBullet); 
-    	}
-    	
-    	for(int i=0; i<blocks.length; i++) {
-    		blocks[i].Update();
-    	}
-    	for (GrumpyBlock currentBlock : blocks) {
-    	    if (player.collidesWith(currentBlock.x, currentBlock.y, currentBlock.width, currentBlock.height)&&!currentBlock.hit) {
-    	    	currentBlock.hit=true;
-    	        gameOver = true;
-    	        break;
-    	    }
-    	}
-    	for (int i=0; i<targets.length; i++) {
-    	    if (targets[i] != null && player.collidesWith(targets[i].x, targets[i].y, targets[i].width, targets[i].height)) {
-    	    	targets[i] = null;
-    	        break;
-    	    }
-    	}
 
-    	if(gameOver) {
-    		countdown--;
-    		p.fill(255, 255, 255);
-    		p.textSize(128);
-    		p.textAlign(PApplet.CENTER, PApplet.CENTER);
-    		p.text("Player Lost", width/2, height/2);
-    		if(countdown == 0) {
-    	        MainSketch.switchScene(new Level3(p, width, height));
-    	    }
-    	}
-    	if(player.gameWon) {
+    public void draw() {
+    	p.background(0,100,0);
+    	drawMaze();
+    	if(password.length()==9) {
     		MainSketch.switchScene(new Level4(p, width, height));
     	}
-
     }
 
     public void keyPressed() {
@@ -183,85 +113,185 @@ public class Level3 implements Scene {
                 case 'd':
                     handleRightPress();
                     break;
-                case ' ':
-                	shooting=true;
-                	break;
             }
         }
-    }
-
-    public void keyReleased() {
-        if (p.key == PApplet.CODED) {
-            switch (p.keyCode) {
-                case PApplet.UP:
-                    handleUpRelease();
-                    break;
-                case PApplet.DOWN:
-                    handleDownRelease();
-                    break;
-                case PApplet.LEFT:
-                    handleLeftRelease();
-                    break;
-                case PApplet.RIGHT:
-                    handleRightRelease();
-                    break;
-            }
-        } else {
-            switch (p.key) {
-                case 'W':
-                case 'w':
-                    handleUpRelease();
-                    break;
-                case 'S':
-                case 's':
-                    handleDownRelease();
-                    break;
-                case 'A':
-                case 'a':
-                    handleLeftRelease();
-                    break;
-                case 'D':
-                case 'd':
-                    handleRightRelease();
-                    break;
-                case ' ':
-                	shooting = false;
-                	break;
-            }
+        
+        int y = characterY/cellSize;
+        int x = characterX/cellSize;
+        if(grid[x][y].isCodeBlock) {
+        	password+=grid[x][y].code;
+        	grid[x][y].isCodeBlock = false;
         }
-    }
-    
-    void handleLeftPress() {
-    	player.xVelocity=-3;
+        
     }
 
-    void handleRightPress() {
-    	player.xVelocity=3;
-    }
+    // Arrow keys press handlers
     void handleUpPress() {
-        player.yVelocity=-3;
+        if(characterY > 0 && !grid[characterX/cellSize][characterY/cellSize].walls[0]) {
+            characterY -= cellSize;
+        }
     }
 
     void handleDownPress() {
-    	player.yVelocity=3;
-    }
-    
-    void handleLeftRelease() {
-    	player.xVelocity=0;
+        if(characterY < height - cellSize && !grid[characterX/cellSize][characterY/cellSize].walls[2]) {
+            characterY += cellSize;
+        }
     }
 
-    void handleRightRelease() {
-    	player.xVelocity=0;
+    void handleLeftPress() {
+        if(characterX > 0 && !grid[characterX/cellSize][characterY/cellSize].walls[3]) {
+            characterX -= cellSize;
+        }
     }
 
-    void handleUpRelease() {
-    	player.yVelocity=0;
+    void handleRightPress() {
+        if(characterX < width - cellSize && !grid[characterX/cellSize][characterY/cellSize].walls[1]) {
+            characterX += cellSize;
+        }
     }
 
-    void handleDownRelease() {
-    	player.yVelocity=0;
+
+    private void generateMaze(int cx, int cy) {
+        int[][] directions = {
+            {1, 0},
+            {-1, 0},
+            {0, 1},
+            {0, -1}
+        };
+        shuffleArray(directions);
+
+        visited[cx][cy] = true;
+
+        // Define the CPU block area
+        int boxSizeInCells = 4;
+        int startX = (cols - boxSizeInCells) / 2;
+        int startY = ((rows - boxSizeInCells) / 2);
+        int endX = startX + boxSizeInCells;
+        int endY = startY + boxSizeInCells;
+
+        // Check if the current cell is inside the CPU block
+        if (cx >= startX && cx < endX && cy >= startY && cy < endY) {
+            return;
+        }
+
+        for (int[] dir : directions) {
+            int nx = cx + dir[0];
+            int ny = cy + dir[1];
+
+            // Check if the neighboring cell is inside the CPU block
+            if (nx >= startX && nx < endX && ny >= startY && ny < endY) {
+                continue;
+            }
+
+            if (nx >= 0 && ny >= 0 && nx < cols && ny < rows && !visited[nx][ny]) {
+                grid[cx][cy].breakWall(dir[0], dir[1]);
+                generateMaze(nx, ny);
+            }
+        }
     }
-    
-    
+    private void drawMaze() {
+        p.stroke(255, 215, 0);  // Gold color
+        p.fill(0, 128, 0);     // Dark green color
+        p.strokeWeight(5);
+
+        for (int x = 0; x < cols; x++) {
+            for (int y = 0; y < rows; y++) {
+                grid[x][y].display();
+            }
+        }
+        
+        // Drawing a black box (CPU) in the center
+        p.fill(0); // Black color
+        p.stroke(255,255,255);
+        p.strokeWeight(3);
+        int boxSize = cellSize*4; // Size of the CPU box (can be adjusted)
+        int centerX = ((cols-4)/2)*cellSize;
+        int centerY = ((rows-4)/2)*cellSize;
+        p.rect(centerX, centerY, boxSize, boxSize);
+        
+        p.fill(255, 0, 0);
+        p.noStroke();
+        p.rect(characterX, characterY, characterSize, characterSize);
+        
+        p.fill(255); // White color for text
+        p.textSize(30); // You can adjust this as needed
+        float textW = p.textWidth(password);
+        p.text(password, centerX + (boxSize - textW) / 2, centerY + boxSize / 2 + 15); // Adjusted for centering the text in the cell
+
+    }
+
+    class Cell {
+        int x, y;
+        boolean[] walls = {true, true, true, true};  // Top, Right, Bottom, Left
+        boolean isCodeBlock = false;
+        String code = "";
+
+        Cell(int x, int y) {
+            this.x = x;
+            this.y = y;
+            
+        }
+
+        void breakWall(int dx, int dy) {
+            if (dx == 1) {
+                walls[1] = false;
+                if (x + dx < cols) grid[x + dx][y].walls[3] = false;
+            } else if (dx == -1) {
+                walls[3] = false;
+                if (x + dx >= 0) grid[x + dx][y].walls[1] = false;
+            } else if (dy == 1) {
+                walls[2] = false;
+                if (y + dy < rows) grid[x][y + dy].walls[0] = false;
+            } else if (dy == -1) {
+                walls[0] = false;
+                if (y + dy >= 0) grid[x][y + dy].walls[2] = false;
+            }
+        }
+
+
+        void display() {
+            int x1 = x * cellSize;
+            int y1 = y * cellSize;
+            int x2 = x1 + cellSize;
+            int y2 = y1 + cellSize;
+
+            if (walls[0]) {
+                p.line(x1, y1, x2, y1);
+            }
+            if (walls[1]) {
+                p.line(x2, y1, x2, y2);
+            }
+            if (walls[2]) {
+                p.line(x2, y2, x1, y2);
+            }
+            if (walls[3]) {
+                p.line(x1, y2, x1, y1);
+            }
+            p.stroke(255, 215, 0);
+            p.fill(0, 128, 0);
+            p.ellipse(x1, y1, 10, 10);  // Circles at line intersections and corners
+            if (isCodeBlock) {
+                p.fill(255); // White color for text
+                p.textSize(20); // You can adjust this as needed
+                float textW = p.textWidth(code);
+                p.text(code, x1 + (cellSize - textW) / 2, y1 + cellSize / 2 + 7); // Adjusted for centering the text in the cell
+            }
+        }
+    }
+    private void shuffleArray(int[][] array) {
+        for (int i = array.length - 1; i > 0; i--) {
+            int index = (int) p.random(i + 1);
+            int[] temp = array[index];
+            array[index] = array[i];
+            array[i] = temp;
+        }
+    }
+
+	@Override
+	public void keyReleased() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

@@ -3,8 +3,8 @@ import processing.core.*;
 public class GrumpyBlock {
 	int x;
 	int y;
-	int height=100;
-	int width=100;
+	int height=80;
+	int width=80;
 	boolean hit=false;
 	PApplet p;
 	PImage img;
