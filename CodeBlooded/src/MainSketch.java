@@ -16,7 +16,7 @@ public class MainSketch extends PApplet{
     }
 
     public void setup() {
-    	currentScene = new Level2(this, width, height);
+    	currentScene = new Level4(this, width, height);
         currentScene.setup();
     }
 
