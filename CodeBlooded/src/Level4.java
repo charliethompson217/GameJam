@@ -154,7 +154,7 @@ public class Level4 implements Scene {
         }
         
         if (player.gameWon) {
-            MainSketch.switchScene(new Level1(p, width, height));
+            MainSketch.switchScene(new FinishScene(p, width, height));
         }
     }
 

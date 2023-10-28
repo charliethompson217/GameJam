@@ -73,7 +73,7 @@ public class Level2 implements Scene {
     	p.fill(0, 0, 0);
     	p.image(end, width-(int) (0.08 * height), height/2, (int) (0.08 * height), (int) (0.08 * height));
     	if (player.x + player.width > (width-(int) (0.08 * height)) && player.y + player.height > (height/2) && player.y < height/2 + ((int) (0.08 * height))) {
-    	    MainSketch.switchScene(new Level3(p, width, height));
+    	    MainSketch.switchScene(new Level3Narration(p, width, height));
     	}
     	if(gameOver) {
     		countdown--;

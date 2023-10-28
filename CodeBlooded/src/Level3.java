@@ -80,7 +80,7 @@ public class Level3 implements Scene {
     	p.background(0,100,0);
     	drawMaze();
     	if(password.length()==9) {
-    		MainSketch.switchScene(new Level4(p, width, height));
+    		MainSketch.switchScene(new Level4Narration(p, width, height));
     	}
     }
 

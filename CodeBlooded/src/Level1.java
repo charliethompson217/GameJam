@@ -85,12 +85,12 @@ public class Level1 implements Scene {
         	interval--;
         	frame=0;
         }
-        if(time>=60*60) {
+        if(time>=60*15) {
         	p.image(helicopter, (width - 200)/2, (height - 200)/2, 200, 200);
         	next=true;
         }
-        if(time>=60*60+60*5) {
-        	MainSketch.switchScene(new Level2(p, width, height));
+        if(time>=60*20) {
+        	MainSketch.switchScene(new Level2Narration(p, width, height));
         }
 
         player.Update(gameOver);
