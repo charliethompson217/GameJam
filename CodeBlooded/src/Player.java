@@ -22,7 +22,7 @@ public class Player{
 	int maxY;
 	PImage playerHelicopter;
 	
-	Player(PApplet p, int x, int y, int maxX, int maxY, PImage playerHelicopter){
+	Player(PApplet p, int x, int y, int maxX, int maxY, PImage playerHelicopter, double xScale, double yScale){
 		this.parent = p;
 		this.playerHelicopter = playerHelicopter;
 		this.x=x;
@@ -32,8 +32,8 @@ public class Player{
 		this.g=255;
 		this.b=255;
 		
-		this.height = (int) (0.083 * maxY);
-		this.width = (int) (0.061 * maxY);
+		this.height = (int) (yScale * maxY);
+		this.width = (int) (xScale * maxY);
 		
 		this.xVelocity=0;
 		this.yVelocity=0;

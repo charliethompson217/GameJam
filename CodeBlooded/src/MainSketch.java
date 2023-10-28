@@ -14,13 +14,14 @@ public class MainSketch extends PApplet{
     }
 
     public void setup() {
-    	currentScene = new Level1(this, width, height);
+    	currentScene = new Level3(this, width, height);
         currentScene.setup();
     }
 
     public void draw() {
     	currentScene.draw();
     }
+    
     public void keyPressed() {
     	currentScene.keyPressed();
     }
@@ -39,4 +40,5 @@ public class MainSketch extends PApplet{
     }
 
 }
+
 

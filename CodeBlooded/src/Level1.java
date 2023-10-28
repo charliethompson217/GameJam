@@ -10,6 +10,9 @@ public class Level1 implements Scene {
     int numZombies = 10;
     PImage drone;
     PImage playerHelicopter;
+    PImage background;
+    PImage end;
+    PGraphics backgroundGraphics;
 
     public Level1(PApplet p, int width, int height) {
         this.p = p;
@@ -17,18 +20,24 @@ public class Level1 implements Scene {
         this.height=height;
         drone = p.loadImage("drone.png");
         playerHelicopter = p.loadImage("level1Player.png");
+        background = p.loadImage("level1background.png");
+        end = p.loadImage("computer.png");
     }
 
     int countdown = 60*3;
     public void setup() {
-    	player = new Player(p, 0, 225, width, height, playerHelicopter);
+    	player = new Player(p, 0, 225, width, height, playerHelicopter, 0.061, 0.083);
     	p.background(255,0,0);
-
+    	backgroundGraphics = p.createGraphics(width, height);
+    	backgroundGraphics.beginDraw();
+    	backgroundGraphics.image(background, 0, 0, width, height);
+    	backgroundGraphics.endDraw();
+    	
     	zombies = new Zombie[numZombies];
     	int sectionWidth = width / numZombies;
 
     		
-		int playerOffSet = (int) (0.05*width);
+		int playerOffSet = (int) (0.083*width);
 		
 		for (int i = 0; i < numZombies; i++) {
 			int direction = 1;
@@ -52,6 +61,7 @@ public class Level1 implements Scene {
 
     public void draw() {
     	p.background(255,0,0);
+    	p.image(backgroundGraphics, 0, 0);
     	player.Update(gameOver);
     	for (int i=0; i<numZombies; i++) {
     		zombies[i].Update(gameOver, player);
@@ -61,9 +71,9 @@ public class Level1 implements Scene {
             }
     	}
     	p.fill(0, 0, 0);
-    	p.rect(width-(int) (0.08 * height), height/2, (int) (0.08 * height), (int) (0.08 * height));
+    	p.image(end, width-(int) (0.08 * height), height/2, (int) (0.08 * height), (int) (0.08 * height));
     	if (player.x + player.width > (width-(int) (0.08 * height)) && player.y + player.height > (height/2) && player.y < height/2 + ((int) (0.08 * height))) {
-    	    MainSketch.switchScene(new Level1(p, width, height));
+    	    MainSketch.switchScene(new Level2(p, width, height));
     	}
     	if(gameOver) {
     		countdown--;
@@ -188,10 +198,19 @@ public class Level1 implements Scene {
     	player.xVelocity=0;
     }
     boolean collidesWith(Player player, Zombie zombie) {
-        return player.x < zombie.x + zombie.width &&
-               player.x + player.width > zombie.x &&
-               player.y < zombie.y + zombie.height &&
-               player.y + player.height > zombie.y;
+        // Calculate the reduced hitbox dimensions and position for the player
+        float hitboxWidth = player.width / 3.0f;
+        float hitboxHeight = player.height / 3.0f;
+        
+        float hitboxX = player.x + (player.width - hitboxWidth) / 2.0f; // centered horizontally
+        float hitboxY = player.y+10; // at the top
+
+        // Adjust the collision checks using the smaller hitbox dimensions and position
+        return hitboxX < zombie.x + zombie.width &&
+               hitboxX + hitboxWidth > zombie.x &&
+               hitboxY < zombie.y + zombie.height &&
+               hitboxY + hitboxHeight > zombie.y;
     }
+
 
 }

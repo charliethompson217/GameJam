@@ -84,9 +84,6 @@ public class Zombie{
         radarAngle += radarSpeed;
 
         if (radarIntersectsPlayer(endX, endY, player)) {
-        	System.out.println("Player detected by radar!");
-        	System.out.println("xVelocity: " + xVelocity + ", yVelocity: " + yVelocity);
-            // Update direction to chase player
             float dx = player.x - x;
             float dy = player.y - y;
             float distance = PApplet.dist(x, y, player.x, player.y);
