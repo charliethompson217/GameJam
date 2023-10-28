@@ -1,4 +1,5 @@
 import processing.core.PApplet;
+import processing.core.*;
 
 
 public class Level3 implements Scene {
@@ -17,7 +18,9 @@ public class Level3 implements Scene {
     private final int characterSize = cellSize;  // Make the character fit inside a cell
     
     String password = "";
-
+    
+    //PImage cpu;
+    PImage bug;
 
     public Level3(PApplet p, int width, int height) {
         this.p = p;
@@ -40,6 +43,8 @@ public class Level3 implements Scene {
 
     int countdown = 60*3;
     public void setup() {
+    	//cpu = p.loadImage("");
+    	bug = p.loadImage("bug.png");
     	p.background(0,100,0);
     	generateMaze(0, 0);
     	
@@ -211,7 +216,7 @@ public class Level3 implements Scene {
         
         p.fill(255, 0, 0);
         p.noStroke();
-        p.rect(characterX, characterY, characterSize, characterSize);
+        p.image(bug, characterX, characterY, characterSize, characterSize);
         
         p.fill(255); // White color for text
         p.textSize(30); // You can adjust this as needed

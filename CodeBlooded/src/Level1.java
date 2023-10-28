@@ -11,9 +11,11 @@ public class Level1 implements Scene {
     PImage background;
     PImage guy;
     PImage robo;
+    PImage helicopter;
     PGraphics backgroundGraphics;
     Player2 player;
     boolean gameOver = false;
+    boolean next = false;
     int interval = 60;
     
     boolean shooting = false;
@@ -27,6 +29,8 @@ public class Level1 implements Scene {
         background = p.loadImage("level4background.png");
         guy = p.loadImage("guy.png");
         robo = p.loadImage("robot2.png");
+        helicopter = p.loadImage("helicopter.png");
+        
     }
 
     int countdown = 60*3;
@@ -39,8 +43,10 @@ public class Level1 implements Scene {
     	player = new Player2(p, width/2, height/2, (width/3), (height/4), (width/3)*2, (height/4)*3, guy, 0.1, 0.1);
     }
     int frame=0;
+    int time=0;
     public void draw() {
         frame++;
+        time++;
         p.background(255,0,0);
         p.image(backgroundGraphics, 0, 0);
 
@@ -61,16 +67,17 @@ public class Level1 implements Scene {
             }
         }
 
-        for (int i = robots.size() - 1; i >= 0; i--) {
-            Robot r = robots.get(i);
-            r.Update();
-
-            // Check for collisions between the robot and the player
-            if (r.collidesWith(player.x, player.y, player.width, player.height)) {
-                gameOver = true;
-                return;  // Exit out of draw method early since we're switching scenes
-            }
-        }
+        if(!next)
+	        for (int i = robots.size() - 1; i >= 0; i--) {
+	            Robot r = robots.get(i);
+	            r.Update();
+	
+	            // Check for collisions between the robot and the player
+	            if (r.collidesWith(player.x, player.y, player.width, player.height)) {
+	                gameOver = true;
+	                return;  // Exit out of draw method early since we're switching scenes
+	            }
+	        }
 
         if(frame % (interval) == 0) {
             robots.add(new Robot(p, robo, width, height));
@@ -78,6 +85,13 @@ public class Level1 implements Scene {
         if(frame % 200==0) {
         	interval--;
         	frame=0;
+        }
+        if(time>=60*60) {
+        	p.image(helicopter, (width - 200)/2, (height - 200)/2, 200, 200);
+        	next=true;
+        }
+        if(time>=60*60+60*5) {
+        	MainSketch.switchScene(new Level2(p, width, height));
         }
 
         player.Update(gameOver);
