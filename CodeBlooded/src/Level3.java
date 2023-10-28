@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import processing.core.*;
 
 public class Level3 implements Scene {
@@ -10,9 +12,17 @@ public class Level3 implements Scene {
     PImage playerHelicopter;
     PImage background;
     PImage target;
+    PImage block1;
+    PImage block2;
+    PImage block3;
+    PImage block4;
     PGraphics backgroundGraphics;
     
     Target targets[];
+    GrumpyBlock blocks[];
+    ArrayList<Bullet> bullets = new ArrayList<>();
+    
+    boolean shooting = false;
 
     public Level3(PApplet p, int width, int height) {
         this.p = p;
@@ -21,6 +31,10 @@ public class Level3 implements Scene {
         playerHelicopter = p.loadImage("level1Player.png");
         background = p.loadImage("level3background.png");
         target = p.loadImage("HotAirBalloon.png");
+        block1 = p.loadImage("block1.png");
+        block2 = p.loadImage("block2.png");
+        block3 = p.loadImage("block3.png");
+        block4 = p.loadImage("block4.png");
     }
 
     int countdown = 60*3;
@@ -33,24 +47,92 @@ public class Level3 implements Scene {
     	backgroundGraphics.image(background, 0, 0);
     	backgroundGraphics.endDraw();
     	
-    	targets = new Target[6];
+    	targets = new Target[5];
     	for(int i=0; i<targets.length; i++) {
     		int speed = 4 + i*2;
     		if(i%2==0)
     			speed*=-1;
-    		targets[i] = new Target(p, i*200+200, 250, width, height, target, 0.1, 0.1, speed);
+    		targets[i] = new Target(p, i*250+250, 250, width, height, target, 0.1, 0.1, speed);
     	}
+    	blocks = new GrumpyBlock[(height/100)*4];
+    	for(int i=0; i<height/100; i++) {
+        	blocks[i*4] = new GrumpyBlock(p, block1, 350, i*100);
+        	blocks[i*4+1] = new GrumpyBlock(p, block2, 600, i*100);
+        	blocks[i*4+2] = new GrumpyBlock(p, block3, 850, i*100);
+        	blocks[i*4+3] = new GrumpyBlock(p, block4, 1100, i*100);
+    	}
+    	
     }
-
+    int frame=0;
     public void draw() {
+    	frame++;
     	p.background(255,0,0);
     	p.image(backgroundGraphics, 0, 0);
     	player.Update(gameOver);
     	
+    	int c=0;
     	for(int i=0; i<targets.length; i++) {
-    		targets[i].Update();
+    		if(targets[i]!=null)
+    			targets[i].Update();
+    		else c++;
+    	}
+    	if(c==targets.length)
+    		gameOver=true;
+    	
+    	for (int i = bullets.size() - 1; i >= 0; i--) {
+            Bullet bullet = bullets.get(i);
+            bullet.Update();
+            if (bullet.x > width) { // If bullet goes off-screen
+                bullets.remove(i);  // Remove it from the list
+            }
+            int count=0;
+            for(int j = 0; j < targets.length; j++) {
+                Target currentTarget = targets[j];
+                if(currentTarget!=null) {
+	                if(bullet.collidesWith(currentTarget.x, currentTarget.y, currentTarget.width, currentTarget.height)) {
+	                    bullets.remove(i);  // Remove the bullet
+	                    targets[j] = null;  // Set the target to null (remove the balloon)
+	                    break;  // exit the loop once a collision is found
+	                }
+                } else {
+                	count++;
+                } 
+            }
+            if (count == targets.length) {
+            	gameOver=true;
+            }
+            for (int j = 0; j < blocks.length; j++) {
+                GrumpyBlock currentBlock = blocks[j];
+                if (!currentBlock.hit)
+	                if (bullet.collidesWith(currentBlock.x, currentBlock.y, currentBlock.width, currentBlock.height)) {
+	                    bullets.remove(i);
+	                    currentBlock.hit = true;
+	                    break;  // Exit the inner loop once a collision is found
+	                }
+            }
+        }
+    	if(shooting&&frame%20==0) {
+    		Bullet newBullet = new Bullet(p, player.x, player.y+30);
+            bullets.add(newBullet); 
     	}
     	
+    	for(int i=0; i<blocks.length; i++) {
+    		blocks[i].Update();
+    	}
+    	for (GrumpyBlock currentBlock : blocks) {
+    	    if (player.collidesWith(currentBlock.x, currentBlock.y, currentBlock.width, currentBlock.height)&&!currentBlock.hit) {
+    	    	currentBlock.hit=true;
+    	        gameOver = true;
+    	        break;
+    	    }
+    	}
+    	for (int i=0; i<targets.length; i++) {
+    	    if (targets[i] != null && player.collidesWith(targets[i].x, targets[i].y, targets[i].width, targets[i].height)) {
+    	    	targets[i] = null;
+    	        break;
+    	    }
+    	}
+
     	if(gameOver) {
     		countdown--;
     		p.fill(255, 255, 255);
@@ -61,6 +143,10 @@ public class Level3 implements Scene {
     	        MainSketch.switchScene(new Level3(p, width, height));
     	    }
     	}
+    	if(player.gameWon) {
+    		MainSketch.switchScene(new Level4(p, width, height));
+    	}
+
     }
 
     public void keyPressed() {
@@ -71,6 +157,12 @@ public class Level3 implements Scene {
                     break;
                 case PApplet.DOWN:
                     handleDownPress();
+                    break;
+                case PApplet.LEFT:
+                    handleLeftPress();
+                    break;
+                case PApplet.RIGHT:
+                    handleRightPress();
                     break;
             }
         } else {
@@ -83,6 +175,17 @@ public class Level3 implements Scene {
                 case 's':
                     handleDownPress();
                     break;
+                case 'A':
+                case 'a':
+                    handleLeftPress();
+                    break;
+                case 'D':
+                case 'd':
+                    handleRightPress();
+                    break;
+                case ' ':
+                	shooting=true;
+                	break;
             }
         }
     }
@@ -96,6 +199,12 @@ public class Level3 implements Scene {
                 case PApplet.DOWN:
                     handleDownRelease();
                     break;
+                case PApplet.LEFT:
+                    handleLeftRelease();
+                    break;
+                case PApplet.RIGHT:
+                    handleRightRelease();
+                    break;
             }
         } else {
             switch (p.key) {
@@ -107,11 +216,28 @@ public class Level3 implements Scene {
                 case 's':
                     handleDownRelease();
                     break;
+                case 'A':
+                case 'a':
+                    handleLeftRelease();
+                    break;
+                case 'D':
+                case 'd':
+                    handleRightRelease();
+                    break;
+                case ' ':
+                	shooting = false;
+                	break;
             }
         }
     }
+    
+    void handleLeftPress() {
+    	player.xVelocity=-3;
+    }
 
-    // Arrow keys press handlers
+    void handleRightPress() {
+    	player.xVelocity=3;
+    }
     void handleUpPress() {
         player.yVelocity=-3;
     }
@@ -119,8 +245,15 @@ public class Level3 implements Scene {
     void handleDownPress() {
     	player.yVelocity=3;
     }
+    
+    void handleLeftRelease() {
+    	player.xVelocity=0;
+    }
 
-    // Arrow keys release handlers
+    void handleRightRelease() {
+    	player.xVelocity=0;
+    }
+
     void handleUpRelease() {
     	player.yVelocity=0;
     }
@@ -128,6 +261,7 @@ public class Level3 implements Scene {
     void handleDownRelease() {
     	player.yVelocity=0;
     }
+    
     
 
 }

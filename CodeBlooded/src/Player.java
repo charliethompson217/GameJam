@@ -20,6 +20,9 @@ public class Player{
 	int maxX;
 	int minY;
 	int maxY;
+	
+	boolean gameWon=false;
+	
 	PImage playerHelicopter;
 	
 	Player(PApplet p, int x, int y, int maxX, int maxY, PImage playerHelicopter, double xScale, double yScale){
@@ -59,6 +62,7 @@ public class Player{
 		        x = newX;
 		    } else if (newX + width > maxX) {
 		        x = maxX - width;  // adjust to just inside the right boundary
+		        gameWon=true;
 		    } else if (newX < minX) {
 		        x = minX;  // adjust to just inside the left boundary
 		    }
@@ -73,5 +77,13 @@ public class Player{
 		    }
 	    }
 	}
+	
+	public boolean collidesWith(float otherX, float otherY, float otherWidth, float otherHeight) {
+	    return this.x < otherX + otherWidth && 
+	           this.x + this.width > otherX && 
+	           this.y < otherY + otherHeight && 
+	           this.y + this.height > otherY;
+	}
+
 
 }

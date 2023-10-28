@@ -21,9 +21,8 @@ public class Level2 implements Scene {
 
     public Level2(PApplet p, int width, int height) {
         this.p = p;
-        this.width=width;
-        this.width-=width%cellSize;
-        this.height=height;
+        this.width = width;
+        this.height = height;
         this.rows = height / cellSize;
         this.cols = width / cellSize;
         this.grid = new Cell[cols][rows];
@@ -193,7 +192,7 @@ public class Level2 implements Scene {
     private void drawMaze() {
         p.stroke(255, 215, 0);  // Gold color
         p.fill(0, 128, 0);     // Dark green color
-        p.strokeWeight(3);
+        p.strokeWeight(5);
 
         for (int x = 0; x < cols; x++) {
             for (int y = 0; y < rows; y++) {
@@ -206,7 +205,7 @@ public class Level2 implements Scene {
         p.stroke(255,255,255);
         p.strokeWeight(3);
         int boxSize = cellSize*4; // Size of the CPU box (can be adjusted)
-        int centerX = (width - boxSize) / 2;
+        int centerX = (width-(width%cellSize) - boxSize) / 2;
         int centerY = ((height/cellSize) * cellSize) / 2;
         p.rect(centerX, centerY, boxSize, boxSize);
         
@@ -266,7 +265,9 @@ public class Level2 implements Scene {
             if (walls[3]) {
                 p.line(x1, y2, x1, y1);
             }
-            p.ellipse(x1, y1, 5, 5);  // Circles at line intersections and corners
+            p.stroke(255, 215, 0);
+            p.fill(0, 128, 0);
+            p.ellipse(x1, y1, 10, 10);  // Circles at line intersections and corners
             if (isCodeBlock) {
                 p.fill(255); // White color for text
                 p.textSize(20); // You can adjust this as needed
