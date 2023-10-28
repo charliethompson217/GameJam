@@ -16,9 +16,15 @@ public class Player{
 	int xVelocity;
 	int yVelocity;
 	
-	Player(PApplet p, int x, int y ){
+	int minX;
+	int maxX;
+	int minY;
+	int maxY;
+	PImage playerHelicopter;
+	
+	Player(PApplet p, int x, int y, int maxX, int maxY, PImage playerHelicopter){
 		this.parent = p;
-		
+		this.playerHelicopter = playerHelicopter;
 		this.x=x;
 		this.y=y;
 				
@@ -26,17 +32,46 @@ public class Player{
 		this.g=255;
 		this.b=255;
 		
-		this.height=50;
-		this.width=50;
+		this.height = (int) (0.083 * maxY);
+		this.width = (int) (0.061 * maxY);
 		
 		this.xVelocity=0;
 		this.yVelocity=0;
+		
+		this.minX=0;
+		this.minY=0;
+		this.maxX=maxX;
+		this.maxY=maxY;
+		
 	}
 	
-	void Update(){
-		parent.fill(r,g,b);
-		parent.rect(x, y, width, height);
-		x+=xVelocity;
-		y+=yVelocity;
+	void Update(Boolean gameOver) {
+	    parent.fill(r, g, b);
+	    parent.image(playerHelicopter, x, y, width, height);
+
+	    if(!gameOver) {
+		    // calculate new x and y positions after movement
+		    int newX = x + xVelocity;
+		    int newY = y + yVelocity;
+	
+		    // check if the new x position (after moving) would be outside the bounds
+		    if (newX + width <= maxX && newX >= minX) {
+		        x = newX;
+		    } else if (newX + width > maxX) {
+		        x = maxX - width;  // adjust to just inside the right boundary
+		    } else if (newX < minX) {
+		        x = minX;  // adjust to just inside the left boundary
+		    }
+	
+		    // check if the new y position (after moving) would be outside the bounds
+		    if (newY + height <= maxY && newY >= minY) {
+		        y = newY;
+		    } else if (newY + height > maxY) {
+		        y = maxY - height;  // adjust to just inside the bottom boundary
+		    } else if (newY < minY) {
+		        y = minY;  // adjust to just inside the top boundary
+		    }
+	    }
 	}
+
 }

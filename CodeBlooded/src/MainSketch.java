@@ -1,15 +1,20 @@
 import processing.core.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
 public class MainSketch extends PApplet{
 	
-	Scene currentScene;
+	static Scene currentScene;
+	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	int width = (int) screenSize.getWidth();
+	int height = (int) screenSize.getHeight();
 	
 	public void settings() {
-        size(1000, 500);
+		fullScreen();
     }
 
     public void setup() {
-    	currentScene = new Level1(this);
+    	currentScene = new Level1(this, width, height);
         currentScene.setup();
     }
 
@@ -24,8 +29,10 @@ public class MainSketch extends PApplet{
     	currentScene.keyReleased();
     }
 
-
-    
+    public static void switchScene(Scene newScene) {
+        currentScene = newScene;
+        currentScene.setup();
+    }
 
     public static void main(String[] args) {
         PApplet.main("MainSketch");
